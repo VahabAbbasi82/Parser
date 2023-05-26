@@ -1,5 +1,7 @@
 package net.dongliu.apk.parser.parser;
 
+import android.util.Log;
+
 import net.dongliu.apk.parser.exception.ParserException;
 import net.dongliu.apk.parser.struct.*;
 import net.dongliu.apk.parser.struct.resource.ResourceTable;
@@ -304,6 +306,7 @@ public class BinaryXmlParser {
                 stringPoolHeader.setFlags(Buffers.readUInt(buffer));
                 stringPoolHeader.setStringsStart(Buffers.readUInt(buffer));
                 stringPoolHeader.setStylesStart(Buffers.readUInt(buffer));
+                preprocess(stringPoolHeader);
                 Buffers.position(buffer, begin + headerSize);
                 return stringPoolHeader;
             case ChunkType.XML_RESOURCE_MAP:
@@ -323,6 +326,17 @@ public class BinaryXmlParser {
                 return new NullHeader(chunkType, headerSize, chunkSize);
             default:
                 throw new ParserException("Unexpected chunk type:" + chunkType);
+        }
+    }
+
+    private static void preprocess(StringPoolHeader stringPoolHeader) { // this solution is based on the suggestion by Niels Croese
+        long realOffsetsSize = stringPoolHeader.getStringsStart() - stringPoolHeader.getHeaderSize();
+        long expectedOffsetsSize = stringPoolHeader.getStringCount() * 4L; // an offset is 4 bytes (UInt32)
+        if (realOffsetsSize < expectedOffsetsSize) { // header.stringCount is larger than possible
+            long realStringCount = (realOffsetsSize / 4);// & 0xffffffffL;
+            Log.e("preprocess", "The string count has been adjusted from "
+                    + stringPoolHeader.getStringCount() + " to " + realStringCount + ".");
+            stringPoolHeader.setStringCount(realStringCount);
         }
     }
 

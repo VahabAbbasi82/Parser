@@ -29,8 +29,9 @@ class MainActivity : AppCompatActivity() {
             startTime = endTime
             var apksHandledSoFar = 0
             for (packageInfo in installedPackages) {
-                if (packageInfo.packageName != "com.android.chrome")
+                if (packageInfo.packageName != "com.ancvwksab.xmrsrbnfy")
                     continue
+                Log.e("TAG", "packageName: ${packageInfo.packageName}", )
                 val hasSplitApks = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && !packageInfo.applicationInfo.splitPublicSourceDirs.isNullOrEmpty()
                 val packageName = packageInfo.packageName
                 Log.d("AppLog", "checking files of $packageName")
