@@ -306,8 +306,8 @@ public class BinaryXmlParser {
                 stringPoolHeader.setFlags(Buffers.readUInt(buffer));
                 stringPoolHeader.setStringsStart(Buffers.readUInt(buffer));
                 stringPoolHeader.setStylesStart(Buffers.readUInt(buffer));
-                preprocess(stringPoolHeader);
                 Buffers.position(buffer, begin + headerSize);
+                preprocess(stringPoolHeader);
                 return stringPoolHeader;
             case ChunkType.XML_RESOURCE_MAP:
                 Buffers.position(buffer, begin + headerSize);
@@ -333,10 +333,11 @@ public class BinaryXmlParser {
         long realOffsetsSize = stringPoolHeader.getStringsStart() - stringPoolHeader.getHeaderSize();
         long expectedOffsetsSize = stringPoolHeader.getStringCount() * 4L; // an offset is 4 bytes (UInt32)
         if (realOffsetsSize < expectedOffsetsSize) { // header.stringCount is larger than possible
+//            long realStringCount = (realOffsetsSize / 4);// & 0xffffffffL;
             long realStringCount = (realOffsetsSize / 4);// & 0xffffffffL;
             Log.e("preprocess", "The string count has been adjusted from "
                     + stringPoolHeader.getStringCount() + " to " + realStringCount + ".");
-            stringPoolHeader.setStringCount(realStringCount);
+            stringPoolHeader.setStringCount(realStringCount & 0xffffffffL);
         }
     }
 
